@@ -36,3 +36,5 @@ RUN cd /app/SSL_Anti-spoofing/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1 &
 #RUN pip install ./
 
 RUN cd /app/SSL_Anti-spoofing && pip install tensorboard tensorboardX librosa==0.9.1
+
+WORKDIR /app/SSL_Anti-spoofing
