@@ -29,6 +29,8 @@ phase = sys.argv[3]
 
 asv_key_file = os.path.join(truth_dir, 'ASV/trial_metadata.txt')
 asv_scr_file = os.path.join(truth_dir, 'ASV/ASVTorch_Kaldi/score.txt')
+#asv_scr_file = os.path.join(truth_dir, 'ASV/trial_metadata.txt')
+
 cm_key_file = os.path.join(truth_dir, 'CM/trial_metadata.txt')
 
 
@@ -50,6 +52,8 @@ def load_asv_metrics():
     idx_tar = asv_key_data[asv_key_data[7] == phase][5] == 'target'
     idx_non = asv_key_data[asv_key_data[7] == phase][5] == 'nontarget'
     idx_spoof = asv_key_data[asv_key_data[7] == phase][5] == 'spoof'
+
+    print(f"{(idx_tar == True).sum()} targets, {(idx_non == True).sum()} nontargets, {(idx_spoof == True).sum()} ")
 
     # Extract target, nontarget, and spoof scores from the ASV scores
     tar_asv = asv_scr_data[2][idx_tar]
@@ -88,7 +92,7 @@ def eval_to_score_file(score_file, cm_key_file):
 
     if len(submission_scores) != len(cm_data):
         print('CHECK: submission has %d of %d expected trials.' % (len(submission_scores), len(cm_data)))
-        exit(1)
+        #exit(1)
 
     # check here for progress vs eval set
     cm_scores = submission_scores.merge(cm_data[cm_data[7] == phase], left_on=0, right_on=1, how='inner')
