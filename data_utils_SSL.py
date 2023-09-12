@@ -14,7 +14,7 @@ ___author__ = "Hemlata Tak"
 __email__ = "tak@eurecom.fr"
 
 
-def genSpoof_list( dir_meta,is_train=False,is_eval=False):
+def genSpoof_list(dir_meta, is_train=False, is_eval=False):
     
     d_meta = {}
     file_list=[]
@@ -81,7 +81,29 @@ class Dataset_ASVspoof2019_train(Dataset):
             
             return x_inp, target
             
+class free_evalset(Dataset):
+	def __init__(self, list_IDs, base_dir, *, trim_audio=True, cut=64600):
+            '''self.list_IDs	: list of strings (each string: utt key),
+               '''
+               
+            self.list_IDs = list_IDs
+            self.base_dir = base_dir
+            self.trim_audio = trim_audio
+            self.cut=cut # take ~4 sec audio (64600 samples)
+
+	def __len__(self):
+            return len(self.list_IDs)
+
+
+	def __getitem__(self, index):
             
+            utt_id = self.list_IDs[index]
+            X, fs = librosa.load(os.path.join(self.base_dir, utt_id), sr=16000)
+            X_pad = pad(X, self.cut)
+            x_inp = Tensor(X_pad)
+            return x_inp,utt_id  
+
+
 class Dataset_ASVspoof2021_eval(Dataset):
 	def __init__(self, list_IDs, base_dir):
             '''self.list_IDs	: list of strings (each string: utt key),
