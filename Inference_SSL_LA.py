@@ -7,7 +7,7 @@ from torch import nn
 from torch import Tensor
 from torch.utils.data import DataLoader
 import yaml
-from data_utils_SSL import genSpoof_list,Dataset_ASVspoof2019_train,Dataset_ASVspoof2021_eval
+from data_utils_SSL import genSpoof_list,Dataset_ASVspoof2019_train,Dataset_ASVspoof2021_eval,free_evalset
 from model import Model
 from tensorboardX import SummaryWriter
 from core_scripts.startup_config import set_random_seed
@@ -105,19 +105,18 @@ def train_epoch(train_loader, model, lr,optim, device):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='ASVspoof2021 baseline system')
     # Dataset
-    parser.add_argument('--database_path', type=str, default='/your/path/to/data/ASVspoof_database/LA/', help='Change this to user\'s full directory address of LA database (ASVspoof2019- for training & development (used as validation), ASVspoof2021 for evaluation scores). We assume that all three ASVspoof 2019 LA train, LA dev and ASVspoof2021 LA eval data folders are in the same database_path directory.')
+    #parser.add_argument('--database_path', type=str, default='/your/path/to/data/ASVspoof_database/LA/', help='Change this to user\'s full directory address of LA database (ASVspoof2019- for training & development (used as validation), ASVspoof2021 for evaluation scores). We assume that all three ASVspoof 2019 LA train, LA dev and ASVspoof2021 LA eval data folders are in the same database_path directory.')
     '''
     % database_path/
     %   |- LA
     %      |- ASVspoof2021_LA_eval/flac
     %      |- ASVspoof2019_LA_train/flac
-    %      |- ASVspoof2019_LA_dev/flac
-
- 
- 
+    %      |- ASVspoof2019_LA_dev/flac 
     '''
+    parser.add_argument('--audio_path', type=str, help='audio files location', required=True)
 
-    parser.add_argument('--protocols_path', type=str, default='database/', help='Change with path to user\'s LA database protocols directory address')
+    #parser.add_argument('--protocols_path', type=str, default='database/', help='Change with path to user\'s LA database protocols directory address')
+    parser.add_argument('--list_filename', type=str, help='full path to the audio list file', required=True)
     '''
     % protocols_path/
     %   |- ASVspoof_LA_cm_protocols
@@ -130,25 +129,27 @@ if __name__ == '__main__':
     # Hyperparameters
     parser.add_argument('--batch_size', type=int, default=14)
     parser.add_argument('--num_epochs', type=int, default=100)
-    parser.add_argument('--lr', type=float, default=0.000001)
-    parser.add_argument('--weight_decay', type=float, default=0.0001)
-    parser.add_argument('--loss', type=str, default='weighted_CCE')
+    # parser.add_argument('--lr', type=float, default=0.000001)
+    # parser.add_argument('--weight_decay', type=float, default=0.0001)
+    # parser.add_argument('--loss', type=str, default='weighted_CCE')
     # model
     parser.add_argument('--seed', type=int, default=1234, 
                         help='random seed (default: 1234)')
     
     parser.add_argument('--model_path', type=str,
                         default=None, help='Model checkpoint')
-    parser.add_argument('--comment', type=str, default=None,
-                        help='Comment to describe the saved model')
+    # parser.add_argument('--comment', type=str, default=None,
+    #                    help='Comment to describe the saved model')
     # Auxiliary arguments
-    parser.add_argument('--track', type=str, default='LA',choices=['LA', 'PA','DF'], help='LA/PA/DF')
+    #parser.add_argument('--track', type=str, default='LA',choices=['LA', 'PA','DF'], help='LA/PA/DF')
     parser.add_argument('--eval_output', type=str, default=None,
                         help='Path to save the evaluation result')
-    parser.add_argument('--eval', action='store_true', default=False,
+    parser.add_argument('--eval', action='store_true', default=True,
                         help='eval mode')
     parser.add_argument('--is_eval', action='store_true', default=False,help='eval database')
     parser.add_argument('--eval_part', type=int, default=0)
+
+    
     # backend options
     parser.add_argument('--cudnn-deterministic-toggle', action='store_false', \
                         default=True, 
@@ -158,9 +159,8 @@ if __name__ == '__main__':
                         default=False, 
                         help='use cudnn-benchmark? (default false)') 
 
-
+    ''' No Training support
     ##===================================================Rawboost data augmentation ======================================================================#
-
     parser.add_argument('--algo', type=int, default=5, 
                     help='Rawboost algos discriptions. 0: No augmentation 1: LnL_convolutive_noise, 2: ISD_additive_noise, 3: SSI_additive_noise, 4: series algo (1+2+3), \
                           5: series algo (1+2), 6: series algo (1+3), 7: series algo(2+3), 8: parallel algo(1,2) .[default=0]')
@@ -202,7 +202,7 @@ if __name__ == '__main__':
                     help='Minimum SNR value for coloured additive noise.[defaul=10]')
     parser.add_argument('--SNRmax', type=int, default=40, 
                     help='Maximum SNR value for coloured additive noise.[defaul=40]')
-    
+    '''
     ##===================================================Rawboost data augmentation ======================================================================#
     
 
@@ -211,47 +211,36 @@ if __name__ == '__main__':
         print(f"Just eval supported, set --eval")
         sys.exit()
 
+    if not args.model_path:
+        print(f"Just eval supported, set --model_path")
+        sys.exit()        
+
     #make experiment reproducible
     set_random_seed(args.seed, args)
     
-    track = args.track
-
-    assert track in ['LA', 'PA','DF'], 'Invalid track given'
+    #track = args.track
+    #assert track in ['LA', 'PA','DF'], 'Invalid track given'
 
     #database
-    prefix      = 'ASVspoof_{}'.format(track)
-    prefix_2019 = 'ASVspoof2019.{}'.format(track)
-    prefix_2021 = 'ASVspoof2021.{}'.format(track)
-    
-    #define model saving path
-    model_tag = 'model_{}_{}_{}_{}_{}'.format(
-        track, args.loss, args.num_epochs, args.batch_size, args.lr)
-    if args.comment:
-        model_tag = model_tag + '_{}'.format(args.comment)
-    model_save_path = os.path.join('models', model_tag)
-
-    #set model save directory
-    if not os.path.exists(model_save_path):
-        os.mkdir(model_save_path)
+    #prefix      = 'ASVspoof_{}'.format(track)
+    #prefix_2019 = 'ASVspoof2019.{}'.format(track)
+    #prefix_2021 = 'ASVspoof2021.{}'.format(track)
     
     #GPU device
     device = 'cuda' if torch.cuda.is_available() else 'cpu'                  
     print('Device: {}'.format(device))
     
-    model = Model(args,device)
+    model = Model(args, device)
     nb_params = sum([param.view(-1).size()[0] for param in model.parameters()])
     model = model.to(device)
     print('nb_params:',nb_params)
     
-    if args.model_path:
-        model.load_state_dict(torch.load(args.model_path,map_location=device))
-        print('Model loaded : {}'.format(args.model_path))
-
+    # load model
+    print(f'Loading Model {args.model_path}')
+    model.load_state_dict(torch.load(args.model_path, map_location=device))
 
     #evaluation 
-    if args.eval:
-        file_eval = genSpoof_list( dir_meta =  os.path.join(args.protocols_path+'{}_cm_protocols/{}.cm.eval.trl.txt'.format(prefix,prefix_2021)),is_train=False,is_eval=True)
-        print('no. of eval trials',len(file_eval))
-        eval_set=Dataset_ASVspoof2021_eval(list_IDs = file_eval,base_dir = os.path.join(args.database_path+'ASVspoof2021_{}_eval/'.format(args.track)))
-        produce_evaluation_file(eval_set, model, device, args.eval_output)
-        sys.exit(0)
+    file_eval = genSpoof_list(dir_meta=args.list_filename, is_train=False, is_eval=True)
+    print('no. of eval trials',len(file_eval))
+    eval_set = free_evalset(list_IDs=file_eval, base_dir=args.audio_path)
+    produce_evaluation_file(eval_set, model, device, args.eval_output)
