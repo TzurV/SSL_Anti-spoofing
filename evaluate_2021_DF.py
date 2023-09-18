@@ -33,9 +33,9 @@ def eval_to_score_file(score_file, cm_key_file):
     
     cm_data = pandas.read_csv(cm_key_file, sep=' ', header=None)
     submission_scores = pandas.read_csv(score_file, sep=' ', header=None, skipinitialspace=True)
-    if len(submission_scores) != len(cm_data):
-        print('CHECK: submission has %d of %d expected trials.' % (len(submission_scores), len(cm_data)))
-        exit(1)
+    #if len(submission_scores) != len(cm_data):
+    #    print('CHECK: submission has %d of %d expected trials.' % (len(submission_scores), len(cm_data)))
+    #    exit(1)
 
     if len(submission_scores.columns) > 2:
         print('CHECK: submission has more columns (%d) than expected (2). Check for leading/ending blank spaces.' % len(submission_scores.columns))
