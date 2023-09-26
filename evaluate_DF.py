@@ -15,6 +15,12 @@ import numpy as np
 import pandas
 import eval_metrics_DF as em
 from glob import glob
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
+
 
 if len(sys.argv) != 3:
     print("CHECK: invalid input arguments. Please read the instruction below:")
@@ -29,10 +35,64 @@ key_file = sys.argv[2]
 #print(f"CM key file: {key_file}")
 
 
+def plot_circle(x, y, value, color='red'):
+  """Plots a circle at the closest point to a given value in a sorted x,y plot.
+
+  Args:
+    x: A NumPy array containing the x-values of the plot.
+    y: A NumPy array containing the y-values of the plot.
+    value: The value to plot the circle at.
+    color: The color of the circle.
+  """
+
+  # Find the closest index to the given value.
+  closest_index = np.argmin(np.abs(x - value))
+
+  # Plot the circle at the closest point.
+  plt.plot(x[closest_index], y[closest_index], 'o', color=color)
+
+def find_eer(fpr, fnr):
+  """Finds the equal error rate (EER).
+
+  Args:
+    fpr: A NumPy array containing the false positive rates.
+    fnr: A NumPy array containing the false negative rates.
+
+  Returns:
+    A float containing the equal error rate.
+  """
+
+  eer = (fpr + fnr) / 2
+  return min(eer)
+
+def draw_roc(fpr, tpr, auc_value, eer, thresh, save_path):
+  """Draws the ROC curve into a PDF.
+
+  Args:
+    fpr: A NumPy array containing the false positive rates.
+    tpr: A NumPy array containing the true positive rates.
+    auc: A float containing the area under the ROC curve.
+    eer: A float containing the equal error rate.
+    save_path: A string containing the path to save the PDF to.
+  """
+
+  fig, ax = plt.subplots()
+  ax.plot(fpr, tpr, label='ROC curve (AUC = {:.3f}, eer = {:.3f})'.format(auc_value, eer))
+  ax.plot([0, 1], [0, 1], 'k--', label='Random')
+  #ax.plot([eer], [eer], 'o', color='red', label='EER ({:.3f})'.format(eer))
+  plot_circle(fpr, tpr, eer)
+  ax.set_xlabel('False Positive Rate')
+  ax.set_ylabel('True Positive Rate')
+  ax.set_title('ROC Curve')
+  ax.legend()
+  plt.savefig(save_path)
+
+
 def eval_to_score_file(score_file, cm_key_file):
     
     submission_scores = pandas.read_csv(score_file, sep=' ', header=None, skipinitialspace=True)
-    print(submission_scores.shape)
+    print(f"Submission scores shape: {submission_scores.shape}")
+    #print(submission_scores)
     #if len(submission_scores) != len(cm_data):
     #    print('CHECK: submission has %d of %d expected trials.' % (len(submission_scores), len(cm_data)))
     #    exit(1)
@@ -42,7 +102,8 @@ def eval_to_score_file(score_file, cm_key_file):
         exit(1)
             
     cm_data = pandas.read_csv(cm_key_file, sep=' ', header=None)
-    print(cm_data.shape)
+    print(f"CM data shape: {cm_data.shape}")
+    #print(cm_data)
     if len(cm_data.columns)>2:
         # assume metadata.txt
         '''
@@ -84,10 +145,31 @@ def eval_to_score_file(score_file, cm_key_file):
         bona_cm = cm_scores[cm_scores['1_y'] == 'bonafide']['1_x'].values
         spoof_cm = cm_scores[cm_scores['1_y'] == 'spoof']['1_x'].values
 
+        # Load the DataFrame
+        df = cm_scores #pd.read_csv('data.csv')
+
+        # Get the class labels and scores
+        y = df['1_y']
+        x = df['1_x']
+
+        # Calculate the ROC curve
+        fpr, tpr, thresholds = roc_curve(y, x, pos_label='bonafide')
+
+        # Calculate the area under the ROC curve (AUC)
+        area_under_ROC = auc(fpr, tpr)
+
+        eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+        thresh = interp1d(fpr, thresholds)(eer)
+
+        # Find the equal error rate (EER)
+        #eer = find_eer(fpr, tpr)
+
+        # Draw the ROC curve into a PDF
+        draw_roc(fpr, tpr, area_under_ROC, eer, thresh, 'roc.pdf')
 
     #cm_scores = submission_scores.merge(cm_data[cm_data[7] == 'progress'], left_on=0, right_on=1, how='inner')  # check here for progress vs eval set
     eer_cm = em.compute_eer(bona_cm, spoof_cm)[0]
-    out_data = "eer: %.2f\n" % (100*eer_cm)
+    out_data = "eer: %.4f\n" % eer_cm
     print(out_data)
     return eer_cm
 
