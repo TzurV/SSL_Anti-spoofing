@@ -29,12 +29,12 @@ RUN conda init bash && conda create -n SSL_Spoofing python=3.7
 RUN echo "conda activate SSL_Spoofing" >> ~/.bashrc 
 SHELL ["/bin/bash", "--login", "-c"] 
 
-RUN conda install pytorch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 cpuonly pandas -c pytorch
+RUN conda install pytorch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 cpuonly pandas matplotlib -c pytorch
 
 
 RUN cd /app/SSL_Anti-spoofing/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1 && pip install ./
 #RUN pip install ./
 
-RUN cd /app/SSL_Anti-spoofing && pip install tensorboard tensorboardX librosa==0.9.1
+RUN cd /app/SSL_Anti-spoofing && pip install tensorboard tensorboardX librosa==0.9.1 
 
 WORKDIR /app/SSL_Anti-spoofing

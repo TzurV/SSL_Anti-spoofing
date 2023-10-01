@@ -103,7 +103,7 @@ def eval_to_score_file(score_file, cm_key_file):
             
     cm_data = pandas.read_csv(cm_key_file, sep=' ', header=None)
     print(f"CM data shape: {cm_data.shape}")
-    #print(cm_data)
+    print(cm_data)
     if len(cm_data.columns)>2:
         # assume metadata.txt
         '''
@@ -121,6 +121,28 @@ def eval_to_score_file(score_file, cm_key_file):
     
         bona_cm = cm_scores[cm_scores[5] == 'bonafide']['1_x'].values
         spoof_cm = cm_scores[cm_scores[5] == 'spoof']['1_x'].values
+
+        # Load the DataFrame
+        df = cm_scores #pd.read_csv('data.csv')
+
+        # Get the class labels and scores
+        y = df[5]
+        x = df['1_x']
+
+        # Calculate the ROC curve
+        fpr, tpr, thresholds = roc_curve(y, x, pos_label='bonafide')
+
+        # Calculate the area under the ROC curve (AUC)
+        area_under_ROC = auc(fpr, tpr)
+
+        eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+        thresh = interp1d(fpr, thresholds)(eer)
+
+        # Find the equal error rate (EER)
+        #eer = find_eer(fpr, tpr)
+
+        # Draw the ROC curve into a PDF
+        draw_roc(fpr, tpr, area_under_ROC, eer, thresh, 'roc.pdf')
 
     else:
         '''
