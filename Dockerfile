@@ -1,11 +1,11 @@
 # Use an official Python runtime as a parent image
 #source https://saturncloud.io/blog/how-to-install-packages-with-miniconda-in-dockerfile-a-guide-for-data-scientists/
-FROM debian:latest
+FROM debian:12.1-slim
 
 
 # Install Miniconda
 RUN apt-get update && apt-get install -y wget nano git g++ && rm -rf /var/lib/apt/lists/*
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_23.1.0-1-Linux-x86_64.sh -O ~/miniconda.sh
 RUN bash ~/miniconda.sh -b -p $HOME/miniconda 
 
 # set the path
