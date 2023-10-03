@@ -142,6 +142,7 @@ def eval_to_score_file(score_file, cm_key_file):
         #eer = find_eer(fpr, tpr)
 
         # Draw the ROC curve into a PDF
+        print("TV:DBG save ROC curve")
         draw_roc(fpr, tpr, area_under_ROC, eer, thresh, 'roc.pdf')
 
     else:
@@ -187,6 +188,7 @@ def eval_to_score_file(score_file, cm_key_file):
         #eer = find_eer(fpr, tpr)
 
         # Draw the ROC curve into a PDF
+        print("TV:DBG save ROC curve")
         draw_roc(fpr, tpr, area_under_ROC, eer, thresh, 'roc.pdf')
 
     #cm_scores = submission_scores.merge(cm_data[cm_data[7] == 'progress'], left_on=0, right_on=1, how='inner')  # check here for progress vs eval set

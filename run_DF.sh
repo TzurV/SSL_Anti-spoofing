@@ -35,3 +35,5 @@ cp $evalFile $resultsPath
 time CUDA_VISIBLE_DEVICES=0 python main_SSL_DF.py --track=DF --is_eval --eval --model_path=/app/model/Best_LA_model_for_DF.pth --eval_output=$resultsPath/eval_CM_scores_file_SSL_Best_LA_model_for_DF.txt --database_path /app/ --protocols_path shorteval/
 python evaluate_2021_DF.py $resultsPath/eval_CM_scores_file_SSL_Best_LA_model_for_DF.txt $trialMetadataDir progress
 
+echo "python evaluate_DF.py $resultsPath/eval_CM_scores_file_SSL_Best_LA_model_for_DF.txt $trialMetadata"
+python evaluate_DF.py $resultsPath/eval_CM_scores_file_SSL_Best_LA_model_for_DF.txt $trialMetadata
