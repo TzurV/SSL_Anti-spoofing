@@ -1,0 +1,38 @@
+# Use an official Python runtime as a parent image
+FROM python:3.7
+
+# Update and install necessary packages
+RUN apt-get update && apt-get install -y wget nano git g++ && rm -rf /var/lib/apt/lists/*
+
+# Create the necessary directories
+RUN mkdir /app
+RUN mkdir -p /app/model
+RUN mkdir -p /app/ASVspoof2021_LA_eval
+RUN mkdir -p /app/results
+
+# Set the working directory
+WORKDIR /app
+
+# Clone the GitHub repository
+RUN git clone https://github.com/TzurV/SSL_Anti-spoofing.git
+
+# Set the working directory back to your project directory
+WORKDIR /app/SSL_Anti-spoofing
+
+
+# copy model 
+RUN curl -L https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt -o /app/SSL_Anti-spoofing/xlsr2_300m.pt
+
+
+# Install required Python packages
+RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 pandas matplotlib
+RUN pip install /app/SSL_Anti-spoofing/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1
+RUN pip install tensorboard tensorboardX librosa==0.9.1
+
+# Set the working directory back to your project directory
+#WORKDIR /app/SSL_Anti-spoofing
+
+CMD ["bash"]
+
+# Create a virtual environment
+#RUN python -m venv venv
