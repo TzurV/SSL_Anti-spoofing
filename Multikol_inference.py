@@ -53,12 +53,12 @@ class multikol_service:
         
         score = (batch_out[:, 1]).data.cpu().numpy().ravel() 
         if score < self.threshold:
-            hepothesis = "spoof"
+            hypothesis = "spoof"
         else:
-            hepothesis = "bonafide"
+            hypothesis = "bonafide"
 
         results = {"score": score[0], 
-                   "hepothesis": hepothesis,
+                   "hypothesis": hypothesis,
                    "original_length": audio_np.shape[0],
                    "padded_length": X_pad.shape[0]}
         logger.info(f"results: {results}")
