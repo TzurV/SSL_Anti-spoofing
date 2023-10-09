@@ -21,7 +21,7 @@ WORKDIR /app/SSL_Anti-spoofing
 
 
 # copy model 
-RUN curl -L https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt -o /app/SSL_Anti-spoofing/xlsr2_300m.pt
+#RUN curl -L https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt -o /app/SSL_Anti-spoofing/xlsr2_300m.pt
 
 
 # Install required Python packages
