@@ -1,5 +1,6 @@
 #!/bin/bash -x
-for file in /app/results/20231001_1107/ASVspoof2021_DF_eval_part00_durations_*.txt;
+#for file in /app/results/20231001_1107/ASVspoof2021_DF_eval_part00_durations_*.txt;
+for file in /app/results/20231001_1107/20231008_ASVspoof2021_DF_eval_part00_durations_6_8.txt;
 do
     testName=$(basename $file .txt)
     echo $testName
