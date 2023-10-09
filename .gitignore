@@ -132,3 +132,4 @@ dmypy.json
 #
 results/
 shorteval/
+xlsr2_300m.pt
