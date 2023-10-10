@@ -263,7 +263,14 @@ class Dataset_ASVspoof2019_train(Dataset):
             return x_inp, target
             
 class free_evalset(Dataset):
-	def __init__(self, list_IDs, base_dir, *, trim_audio=True, cut=64600):
+	def __init__(self, list_IDs, base_dir, *, cut=64600,
+                 aggressiveness=0,
+                 frameLength=10,
+                 padding_duration_ms=150,
+                 start_voice_threshold=0.6,
+                 end_voice_threshold=0.6,
+                 trim_audio=True,
+                 skip_first_ms=0):
             '''self.list_IDs	: list of strings (each string: utt key),
                '''
                
@@ -271,12 +278,12 @@ class free_evalset(Dataset):
             self.base_dir = base_dir
             self.trim_audio = trim_audio
             self.cut=cut # take ~4 sec audio (64600 samples)
-            self.aggressiveness=0
-            self.frameLength=30
-            self.padding_duration_ms=150
-            self.start_voice_threshold=0.6
-            self.end_voice_threshold=0.6
-            self.skip_first_ms=0
+            self.aggressiveness=aggressiveness
+            self.frameLength=frameLength
+            self.padding_duration_ms=padding_duration_ms
+            self.start_voice_threshold=start_voice_threshold
+            self.end_voice_threshold=end_voice_threshold
+            self.skip_first_ms=skip_first_ms
             
 
 	def __len__(self):
