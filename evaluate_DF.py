@@ -119,15 +119,15 @@ def eval_to_score_file(score_file, cm_key_file):
         print(cm_scores.shape)
         print(cm_scores.head())
     
-        bona_cm = cm_scores[cm_scores[5] == 'bonafide']['1_x'].values
-        spoof_cm = cm_scores[cm_scores[5] == 'spoof']['1_x'].values
-
         # Load the DataFrame
         df = cm_scores #pd.read_csv('data.csv')
 
         # Get the class labels and scores
         y = df[5]
         x = df['1_x']
+        
+        #bona_cm = cm_scores[cm_scores[5] == 'bonafide']['1_x'].values
+        #spoof_cm = cm_scores[cm_scores[5] == 'spoof']['1_x'].values
 
         # Calculate the ROC curve
         fpr, tpr, thresholds = roc_curve(y, x, pos_label='bonafide')
@@ -142,7 +142,7 @@ def eval_to_score_file(score_file, cm_key_file):
         #eer = find_eer(fpr, tpr)
 
         # Draw the ROC curve into a PDF
-        print("TV:DBG save ROC curve")
+        print(f"TV:DBG save ROC curve eer={eer}")
         draw_roc(fpr, tpr, area_under_ROC, eer, thresh, 'roc.pdf')
 
     else:
@@ -165,8 +165,8 @@ def eval_to_score_file(score_file, cm_key_file):
         print(cm_scores.shape)
         print(cm_scores.head())
 
-        bona_cm = cm_scores[cm_scores['1_y'] == 'bonafide']['1_x'].values
-        spoof_cm = cm_scores[cm_scores['1_y'] == 'spoof']['1_x'].values
+        #bona_cm = cm_scores[cm_scores['1_y'] == 'bonafide']['1_x'].values
+        #spoof_cm = cm_scores[cm_scores['1_y'] == 'spoof']['1_x'].values
 
         # Load the DataFrame
         df = cm_scores #pd.read_csv('data.csv')
@@ -192,10 +192,10 @@ def eval_to_score_file(score_file, cm_key_file):
         draw_roc(fpr, tpr, area_under_ROC, eer, thresh, 'roc.pdf')
 
     #cm_scores = submission_scores.merge(cm_data[cm_data[7] == 'progress'], left_on=0, right_on=1, how='inner')  # check here for progress vs eval set
-    eer_cm = em.compute_eer(bona_cm, spoof_cm)[0]
-    out_data = "eer: %.4f\n" % eer_cm
-    print(out_data)
-    return eer_cm
+    #eer_cm = em.compute_eer(bona_cm, spoof_cm)[0]
+    #out_data = "eer: %.4f\n" % eer_cm
+    #print(out_data)
+    return eer
 
 if __name__ == "__main__":
 
