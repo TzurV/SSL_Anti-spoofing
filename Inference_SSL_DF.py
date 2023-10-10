@@ -244,7 +244,25 @@ if __name__ == '__main__':
     #evaluation 
     file_eval = genSpoof_list(dir_meta=args.list_filename, is_train=False, is_eval=True)
     print('no. of eval trials',len(file_eval))
-    eval_set = free_evalset(list_IDs=file_eval, base_dir=args.audio_path, trim_audio=False)
+
+    trim_audio = True
+    aggressiveness = 0
+    frameLength = 30 
+    padding_duration_ms = 150
+    start_voice_threshold = 0.6
+    end_voice_threshold = 0.6
+    skip_first_ms = 0
+    testname = f"a{aggressiveness}_f{frameLength}_p{padding_duration_ms}_s{start_voice_threshold}_e{end_voice_threshold}_t{skip_first_ms}"
+    if trim_audio:
+        print(f"Vad testname: {testname}")
+
+    eval_set = free_evalset(list_IDs=file_eval, base_dir=args.audio_path, trim_audio=True,
+                            aggressiveness=aggressiveness, frameLength=frameLength,
+                            padding_duration_ms=padding_duration_ms,
+                            start_voice_threshold=start_voice_threshold,
+                            end_voice_threshold=end_voice_threshold,
+                            skip_first_ms=skip_first_ms)
+    
     produce_evaluation_file(eval_set, model, device, args.eval_output)
 
 
