@@ -112,7 +112,7 @@ def vad_collector(sample_rate, frame_duration_ms,
     Returns: A generator that yields PCM audio data.
     """
     num_padding_frames = int(padding_duration_ms / frame_duration_ms)
-    print(f"num_padding_frames={num_padding_frames}")
+    #print(f"num_padding_frames={num_padding_frames}")
     # We use a deque for our sliding window/ring buffer.
     ring_buffer = collections.deque(maxlen=num_padding_frames)
     # We have two states: TRIGGERED and NOTTRIGGERED. We start in the
@@ -124,7 +124,7 @@ def vad_collector(sample_rate, frame_duration_ms,
         is_speech = vad.is_speech(frame.bytes, sample_rate)
         #print(index, is_speech)
 
-        sys.stdout.write('1' if is_speech else '0')
+        #sys.stdout.write('1' if is_speech else '0')
         if not triggered:
             ring_buffer.append((frame, is_speech))
             num_voiced = len([f for f, speech in ring_buffer if speech])
@@ -133,7 +133,7 @@ def vad_collector(sample_rate, frame_duration_ms,
             # TRIGGERED state.
             if num_voiced > start_voice_threshold * ring_buffer.maxlen:
                 triggered = True
-                sys.stdout.write('+(%s)' % (ring_buffer[0][0].timestamp,))
+                #sys.stdout.write('+(%s)' % (ring_buffer[0][0].timestamp,))
                 # We want to yield all the audio we see from now until
                 # we are NOTTRIGGERED, but we have to start with the
                 # audio that's already in the ring buffer.
@@ -150,7 +150,7 @@ def vad_collector(sample_rate, frame_duration_ms,
             # unvoiced, then enter NOTTRIGGERED and yield whatever
             # audio we've collected.
             if num_unvoiced > end_voice_threshold * ring_buffer.maxlen:
-                sys.stdout.write('-(%s)' % (frame.timestamp + frame.duration))
+                #sys.stdout.write('-(%s)' % (frame.timestamp + frame.duration))
                 triggered = False
                 #yield b''.join([f.bytes for f in voiced_frames])
                 #audio_data = b''.join([f.bytes for f in voiced_frames])
@@ -160,9 +160,9 @@ def vad_collector(sample_rate, frame_duration_ms,
                 ring_buffer.clear()
                 voiced_frames = []
 
-    if triggered:
-        sys.stdout.write('-(%s)' % (frame.timestamp + frame.duration))
-    sys.stdout.write('\n')
+    #if triggered:
+    #    sys.stdout.write('-(%s)' % (frame.timestamp + frame.duration))
+    #sys.stdout.write('\n')
     # If we have any leftover voiced audio when we run out of input,
     # yield it.
     if voiced_frames:
@@ -271,6 +271,13 @@ class free_evalset(Dataset):
             self.base_dir = base_dir
             self.trim_audio = trim_audio
             self.cut=cut # take ~4 sec audio (64600 samples)
+            self.aggressiveness=0
+            self.frameLength=30
+            self.padding_duration_ms=150
+            self.start_voice_threshold=0.6
+            self.end_voice_threshold=0.6
+            self.skip_first_ms=0
+            
 
 	def __len__(self):
             return len(self.list_IDs)
@@ -282,7 +289,13 @@ class free_evalset(Dataset):
             X, fs = librosa.load(os.path.join(self.base_dir, utt_id), sr=16000)
 
             if self.trim_audio:
-                X = remove_short_pause(X, skip_first_ms=0)
+                X = remove_short_pause(X, 
+                                       aggressiveness=self.aggressiveness, 
+                                       frameLength=self.frameLength,
+                                       padding_duration_ms=self.padding_duration_ms, 
+                                       start_voice_threshold=self.start_voice_threshold,
+                                       end_voice_threshold=self.end_voice_threshold, 
+                                       skip_first_ms=self.skip_first_ms)
 
             X_pad = pad(X, self.cut)
             x_inp = Tensor(X_pad)
