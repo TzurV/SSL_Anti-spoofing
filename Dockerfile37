@@ -27,7 +27,7 @@ WORKDIR /app/SSL_Anti-spoofing
 # Install required Python packages
 RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 pandas matplotlib
 RUN pip install /app/SSL_Anti-spoofing/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1
-RUN pip install tensorboard tensorboardX librosa==0.9.1
+RUN pip install tensorboard tensorboardX librosa==0.9.1 webrtcvad
 
 # Set the working directory back to your project directory
 #WORKDIR /app/SSL_Anti-spoofing

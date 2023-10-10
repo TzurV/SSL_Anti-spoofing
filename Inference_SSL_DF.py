@@ -244,7 +244,7 @@ if __name__ == '__main__':
     #evaluation 
     file_eval = genSpoof_list(dir_meta=args.list_filename, is_train=False, is_eval=True)
     print('no. of eval trials',len(file_eval))
-    eval_set = free_evalset(list_IDs=file_eval, base_dir=args.audio_path)
+    eval_set = free_evalset(list_IDs=file_eval, base_dir=args.audio_path, trim_audio=False)
     produce_evaluation_file(eval_set, model, device, args.eval_output)
 
 
