@@ -191,7 +191,7 @@ def remove_short_pause(original_audio, *,
     just_audio = np.concatenate(just_audio_segments)
 
     if skip_first_ms>0:
-        just_audio = just_audio[int(sample_rate*skip_first_ms):]
+        just_audio = just_audio[int(sample_rate*skip_first_ms/1000):]
 
     return just_audio.astype(np.float32) / 32767.0
 
