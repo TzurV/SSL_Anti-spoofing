@@ -28,9 +28,12 @@ RUN git clone https://github.com/TzurV/SSL_Anti-spoofing.git
 # Set the working directory back to your project directory
 WORKDIR /app/SSL_Anti-spoofing
 
-
 # copy model 
 #RUN curl -L https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt -o /app/SSL_Anti-spoofing/xlsr2_300m.pt
+
+# Install the gdown package and download file
+#RUN pip3 install gdown
+#RUN gdown --id 1c4ywztEVlYVijfwbGLl9OEa1SNtFKppB/Best_LA_model_for_DF.pth --output /app/SSL_Anti-spoofing/Best_LA_model_for_DF.pth
 
 
 # Install required Python packages
