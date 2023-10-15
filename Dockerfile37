@@ -13,6 +13,15 @@ RUN mkdir -p /app/results
 # Set the working directory
 WORKDIR /app
 
+# install poetry
+RUN pip3 install poetry
+
+# Initialize a new Poetry project
+RUN poetry init
+
+# Install the project's dependencies
+RUN poetry install
+
 # Clone the GitHub repository
 RUN git clone https://github.com/TzurV/SSL_Anti-spoofing.git
 
