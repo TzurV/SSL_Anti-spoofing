@@ -6,8 +6,8 @@ import librosa
 # settings default
 local_settings = {"model_path": "/app/model/Best_LA_model_for_DF.pth", 
                   "log_level": logging.WARNING,
-                  "audio_file1": "/app/ASVspoof2021_DF_eval/flac/DF_E_2008899.flac",
-                  "audio_file2": "/app/ASVspoof2021_DF_eval/flac/DF_E_2014017.flac",
+                  "audio_file1": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/DF_E_2008899_spoof.flac",
+                  "audio_file2": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/DF_E_2014017_original.flac",
                   "threshold": 0.0}
 
 '''
@@ -23,17 +23,17 @@ if __name__ == '__main__':
     # load model
     service = multikol_service(local_settings)
 
+    # first file
     logger.info(f"spoof file {local_settings['audio_file1']}")
     audio, sr = librosa.load(local_settings["audio_file1"], sr=16000)
 
-    #
     result = service.inference(audio)
     logger.info(f"Final test result: {result}")
 
+    # second file
     logger.info(f"bonafide file {local_settings['audio_file2']}")
     audio, sr = librosa.load(local_settings["audio_file2"], sr=16000)
 
-    #
     result = service.inference(audio)
     logger.info(f"Final test result: {result}")
 
