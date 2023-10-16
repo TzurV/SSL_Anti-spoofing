@@ -8,6 +8,7 @@ local_settings = {"model_path": "/app/model/Best_LA_model_for_DF.pth",
                   "log_level": logging.WARNING,
                   "audio_file1": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/DF_E_2008899_spoof.flac",
                   "audio_file2": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/DF_E_2014017_original.flac",
+                  "audio_file3": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/shortTestRecording.wav",
                   "threshold": 0.0}
 
 '''
@@ -37,3 +38,9 @@ if __name__ == '__main__':
     result = service.inference(audio)
     logger.info(f"Final test result: {result}")
 
+    # third file
+    logger.info(f"bonafide file {local_settings['audio_file3']}")
+    audio, sr = librosa.load(local_settings["audio_file3"], sr=16000)
+
+    result = service.inference(audio)
+    logger.info(f"Final test result: {result}")
