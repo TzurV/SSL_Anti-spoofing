@@ -52,15 +52,15 @@ class multikol_service:
         batch_out = self.model(batch_x)
         
         score = (batch_out[:, 1]).data.cpu().numpy().ravel() 
-        real_person = True
+        Authentic_person = True
         if score < self.threshold:
-            hypothesis = "spoof"
-            real_person = False
+            hypothesis = "Spoof"
+            Authentic_person = False
         else:
-            hypothesis = "bonafide"
+            hypothesis = "Authentic"
 
         results = {"score": score[0],
-                   "real_person": real_person,
+                   "is_authentic": Authentic_person,
                    "hypothesis": hypothesis,
                    "original_length": audio_np.shape[0],
                    "padded_length": X_pad.shape[0],
