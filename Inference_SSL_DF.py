@@ -245,13 +245,13 @@ if __name__ == '__main__':
     file_eval = genSpoof_list(dir_meta=args.list_filename, is_train=False, is_eval=True)
     print('no. of eval trials',len(file_eval))
 
-    trim_audio = True
+    trim_audio = False
     aggressiveness = 0
     frameLength = 30 
     padding_duration_ms = 150
     start_voice_threshold = 0.6
     end_voice_threshold = 0.6
-    skip_first_ms = 0
+    skip_first_ms = 100
     testname = f"a{aggressiveness}_f{frameLength}_p{padding_duration_ms}_s{start_voice_threshold}_e{end_voice_threshold}_t{skip_first_ms}"
     if trim_audio:
         print(f"Vad testname: {testname}")
