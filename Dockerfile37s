@@ -5,25 +5,34 @@ FROM python:3.7 as base
 RUN apt-get update && apt-get install -y supervisor wget nano git g++ && rm -rf /var/lib/apt/lists/*
 
 
-# ----------------------
-FROM base as builder
+
+FROM base as antispoofing
+WORKDIR /app
+RUN git clone https://github.com/TzurV/SSL_Anti-spoofing.git
+COPY model/xlsr2_300m.pt /app/SSL_Anti-spoofing/xlsr2_300m.pt
+COPY model/Best_LA_model_for_DF.pth /app/SSL_Anti-spoofing
+
+
+FROM base as runner
+WORKDIR /app
+COPY --from=antispoofing /app/SSL_Anti-spoofing SSL_Anti-spoofing
+COPY pyproject.toml poetry.lock ./
+
+
 ENV POETRY_VERSION=1.4.2
 ENV POETRY_HOME=/opt/poetry
 ENV POETRY_CACHE_DIR=/opt/.cache
 
-WORKDIR /opt/app/
-COPY pyproject.toml poetry.lock ./
-
 RUN pip install poetry==${POETRY_VERSION}
 RUN poetry check
-RUN poetry config virtualenvs.in-project true
+RUN poetry config virtualenvs.create false
 RUN poetry install --without=dev --no-root
 
+RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 pandas matplotlib
+RUN pip install /app/SSL_Anti-spoofing/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1/
+RUN pip install tensorboard tensorboardX librosa==0.9.1 webrtcvad
 
-FROM base as runner
 
-WORKDIR /opt/app/
-COPY --from=builder /opt/app/.venv .venv
 COPY app app
 COPY docker-entrypoint.sh .
 
@@ -34,57 +43,7 @@ COPY docker-entrypoint.sh .
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/opt/app/.venv/bin:$PATH"
-ENV VERSION=$tag
+ENV VERSION=$VERSION
 
 
-# ----------------------
-# Create the necessary directories
-#RUN mkdir /app
-RUN mkdir -p /app/model
-
-#RUN mkdir -p /app/ASVspoof2021_LA_eval
-#RUN mkdir -p /app/results
-
-# Set the working directory
-WORKDIR /app
-
-# install poetry
-#RUN pip3 install poetry
-
-# Initialize a new Poetry project
-#RUN poetry init
-
-# Install the project's dependencies
-#RUN poetry install
-
-# Clone the GitHub repository
-RUN git clone https://github.com/TzurV/SSL_Anti-spoofing.git
-
-# Set the working directory back to your project directory
-WORKDIR /app/SSL_Anti-spoofing
-
-# copy model 
-#RUN curl -L https://dl.fbaipublicfiles.com/fairseq/wav2vec/xlsr2_300m.pt -o /app/SSL_Anti-spoofing/xlsr2_300m.pt
-COPY model/xlsr2_300m.pt /app/SSL_Anti-spoofing/xlsr2_300m.pt
-
-# Install the gdown package and download file
-#RUN pip3 install gdown
-#RUN gdown --id 1c4ywztEVlYVijfwbGLl9OEa1SNtFKppB/Best_LA_model_for_DF.pth --output /app/SSL_Anti-spoofing/Best_LA_model_for_DF.pth
-
-
-# Install required Python packages
-RUN pip install torch==1.8.1 torchvision==0.9.1 torchaudio==0.8.1 pandas matplotlib
-RUN pip install /app/SSL_Anti-spoofing/fairseq-a54021305d6b3c4c5959ac9395135f63202db8f1
-RUN pip install tensorboard tensorboardX librosa==0.9.1 webrtcvad
-
-# Set the working directory back to your project directory
-#WORKDIR /app/SSL_Anti-spoofing
-
-#CMD ["bash"]
-
-# Create a virtual environment
-#RUN python -m venv venv
-
-WORKDIR /opt/app/
-
-ENTRYPOINT ["/bin/bash", "/opt/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/docker-entrypoint.sh"]
