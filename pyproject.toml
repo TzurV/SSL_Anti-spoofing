@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "multikol-detec-poc"
+version = "0.1.0"
+description = "test if a .wav file ir real or spoof with Tak 2022 algorithm"
+authors = ["efrat miyara <efrat@tensor-tech.co.il>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.103.2"
+librosa = "^0.10.1"
+logging = "^0.4.9.6"
+pydantic = "^2.4.2"
+DateTime = "^5.2"
+pathlib = "^1.0.1"
+pytest = "^7.4.2"
+pydantic-settings = "^2.0.3"
+uvicorn = "^0.22.0"
+python-multipart = "^0.0.6"
+gunicorn = "^21.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
