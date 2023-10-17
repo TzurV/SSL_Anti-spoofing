@@ -4,7 +4,7 @@ from  Multikol_inference import *
 import librosa
 
 # settings default
-local_settings = {"model_path": "/app/model/Best_LA_model_for_DF.pth", 
+local_settings = {"model_path": "/app/SSL_Anti-spoofing/Best_LA_model_for_DF.pth", 
                   "log_level": logging.WARNING,
                   "audio_file1": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/DF_E_2008899_spoof.flac",
                   "audio_file2": "/app/SSL_Anti-spoofing/ASVspoof2021_DF_eval/flac/DF_E_2014017_original.flac",
